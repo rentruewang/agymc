@@ -1,3 +1,2 @@
 numpy
 gym
-gym[all]

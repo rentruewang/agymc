@@ -3,7 +3,6 @@ import asyncio
 
 import gym
 import numpy as np
-from tqdm import tqdm
 
 
 class Container(tuple):
@@ -11,7 +10,38 @@ class Container(tuple):
         return Container(it(*args, **kwargs) for it in self)
 
     def __getattr__(self, name):
-        return Container(it.__getattribute__(name) for it in self)
+        return Container(object.__getattribute__(it, name) for it in self)
+
+
+# ! these functions are methods of Env class
+# ! but are defined out here to avoid bounded method overhead
+async def _Env_reset(self, i):
+    env = self[i]
+    env.done = False
+    env.reset()
+
+
+async def _Env_render(self, i):
+    self[i].render()
+
+
+async def _Env_step(self, i, action):
+    env = self[i]
+    if not env.done:
+        out = env.step(action)
+        if out[2]:
+            env.done = True
+        return out
+    else:
+        return (None, None, True, None)
+
+
+async def _Env_close(self, i):
+    self[i].close()
+
+
+async def _Env_seed(self, i, seed):
+    self[i].seed(seed)
 
 
 class Env(Container):
@@ -19,45 +49,44 @@ class Env(Container):
         raise AttributeError
 
     def reset(self):
-        return Container(
-            asyncio.get_event_loop().run_until_complete(
-                asyncio.gather(*(self._reset(env) for env in self))
-            )
+        asyncio.get_event_loop().run_until_complete(
+            asyncio.gather(*(_Env_reset(self, i) for i in range(len(self))))
         )
-
-    async def _reset(self, env):
-        env.done = False
-        return env.reset()
 
     def render(self):
-        return Container(
-            asyncio.get_event_loop().run_until_complete(
-                asyncio.gather(*(self._render(env) for env in self))
-            )
+        asyncio.get_event_loop().run_until_complete(
+            asyncio.gather(*(_Env_render(self, i) for i in range(len(self))))
         )
-
-    async def _render(self, env):
-        return env.render()
 
     def step(self, actions):
         return zip(
             *asyncio.get_event_loop().run_until_complete(
                 asyncio.gather(
-                    *(self._step(env, action) for (env, action) in zip(self, actions))
+                    *(
+                        _Env_step(self, i, action)
+                        for (i, action) in zip(range(len(self)), actions)
+                    )
                 )
             )
         )
 
-    async def _step(self, env, action):
-        if not env.done:
-            out = env.step(action)
-            if out[2]:
-                env.done = True
-            return out
+    def close(self):
+        return asyncio.get_event_loop().run_until_complete(
+            asyncio.gather(*(_Env_close(self, i) for i in range(len(self))))
+        )
+
+    def seed(self, seeds):
+        if hasattr(seeds, "__iter__"):
+            return asyncio.get_event_loop().run_until_complete(
+                asyncio.gather(
+                    *(_Env_seed(self, i, s) for (i, s) in zip(range(len(self)), seeds))
+                )
+            )
         else:
-            return (None, None, True, None)
+            return asyncio.get_event_loop().run_until_complete(
+                asyncio.gather(*(_Env_seed(self, i, seeds) for i in range(len(self))))
+            )
 
 
 def make(name_env, num_envs):
     return Env((gym.make(name_env) for _ in range(num_envs)))
-
