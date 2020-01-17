@@ -55,10 +55,7 @@ async def _Env_seed(self, i, seed):
     self[i].seed(seed)
 
 
-class Env(Container):
-    def __call__(self, *args, **kwargs):
-        raise AttributeError
-
+class Env(tuple):
     def reset(self):
         asyncio.get_event_loop().run_until_complete(
             asyncio.gather(*(_Env_reset(self, i) for i in range(len(self))))
