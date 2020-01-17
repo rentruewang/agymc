@@ -1,3 +1,14 @@
+"""
+This where the Env class is defined,
+which handles wrapping all enviroments.
+
+FIXME
+The asynchronous version speeds up parallel execution by allowing calles that are time consuming to execute in the background.
+Since we introduce a lot of python overhead by wrapping calles to iterables with `Container` class,
+if there are no such blocking calles,
+the performance can be as slow as 4 - 5 times slower than the unwrapped version.
+We plan to reimplement the code with ctypes module in the near future.
+"""
 import argparse
 import asyncio
 
