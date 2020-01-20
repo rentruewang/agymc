@@ -1,6 +1,6 @@
 import argparse
 
-from agymc import *
+from env import *
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -17,7 +17,7 @@ if __name__ == "__main__":
     if verbose:
         import tqdm
 
-        iterable = tqdm(range(num_episodes))
+        iterable = tqdm.tqdm(range(num_episodes))
     else:
         iterable = range(num_episodes)
     for _ in iterable:

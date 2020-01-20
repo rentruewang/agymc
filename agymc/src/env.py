@@ -14,7 +14,7 @@ precisely because of the asynchronous nature
 
 ! Yes, this file can be written entirely with ctypes,
 ! however, that would make its python API much harder to use,
-! which defeats the purpose of it being syntax sugar,
+! which defeats its purpose of being syntax sugar,
 ! for wrapping multiple gym environments concurrently.
 """
 import argparse

@@ -1,6 +1,6 @@
 #! /bin/bash
 
-NUMENV=1000
+NUMENV=200
 NUMEPISODES=50
 
 TARGET=$(pwd)/../agymc/src
