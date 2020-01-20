@@ -10,11 +10,13 @@ if __name__ == "__main__":
     parser.add_argument("--render", action="store_true")
     parser.add_argument("--verbose", action="store_true")
     flags = parser.parse_args()
+
     num_envs = flags.num_envs
     num_episodes = flags.episodes
     render = flags.render
     verbose = flags.verbose
-    envs = tuple(gym.make("CartPole-v1") for _ in range(num_envs))
+
+    envs = tuple(gym.make("CartPole-v0") for _ in range(num_envs))
     if verbose:
         import tqdm
 

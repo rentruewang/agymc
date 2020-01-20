@@ -33,11 +33,51 @@ Despite its merits, OpenAI gym has one major drawback. It is designed to run _on
 
 Using `env.render` as our bottlenecking operation, runing 200 environments, our version`agymc` completes 50 episodes in 4 minutes, while naive `gym` version takes around twice as long. This is what the madness looks like:
 
-![Screenshot from 2020-01-20 21-02-55](./assets/Screenshot from 2020-01-20 21-02-55.png)
+![Screenshot_1](./assets/Screenshot_1.png)
 
 ### Wow, how to use agymc ?
 
-`agymc`, which combines the power of `Python` async API and OpenAI gym, hence the name, uses the exact same API as OpenAI gym. Except now the returns are in _batches_ (lists). And except serveral environments are run asynchronously.
+`agymc`, which combines the power of `Python` async API and OpenAI gym, hence the name, designed for users to make final Except now the returns are in _batches_ (lists). And except serveral environments are run asynchronously.
+
+### Example Usage Code Snippet
+
+```python
+import argparse
+
+import agymc
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--num-envs", type=int)
+    parser.add_argument("--episodes", type=int)
+    parser.add_argument("--render", action="store_true")
+    parser.add_argument("--verbose", action="store_true")
+    flags = parser.parse_args()
+
+    num_envs = flags.num_envs
+    num_episodes = flags.episodes
+    render = flags.render
+    verbose = flags.verbose
+
+    envs = agync.make("CartPole-v0", num_envs)
+    if verbose:
+        import tqdm
+
+        iterable = tqdm.tqdm(range(num_episodes))
+    else:
+        iterable = range(num_episodes)
+
+    for _ in iterable:
+        done = list(False for _ in range(num_envs))
+        envs.reset()
+
+        while not all(done):
+            if render:
+                envs.render()
+            action = envs.action_space.sample()
+            (_, _, done, _) = envs.step(action)
+    envs.close()
+```
 
 
 

@@ -1,6 +1,6 @@
 import argparse
 
-from env import *
+import agymc
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -9,11 +9,13 @@ if __name__ == "__main__":
     parser.add_argument("--render", action="store_true")
     parser.add_argument("--verbose", action="store_true")
     flags = parser.parse_args()
+
     num_envs = flags.num_envs
     num_episodes = flags.episodes
     render = flags.render
     verbose = flags.verbose
-    envs = make("CartPole-v1", num_envs)
+
+    envs = agync.make("CartPole-v0", num_envs)
     if verbose:
         import tqdm
 

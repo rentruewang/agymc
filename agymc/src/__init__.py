@@ -1,4 +1,3 @@
-from env import Container as _Container
-from env import Env, make
+from env import Env, ObjectHolder, make
 
 __all__ = ("make",)
