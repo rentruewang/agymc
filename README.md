@@ -1,6 +1,15 @@
 # agymc
 
+![gym](./assets/gym.png)
+
 **For reinforcement learning and concurrency lovers out there ...**
+
+### TL;DR
+
+- Mostly the same API as gym, except now multiple environments are run.
+- Envs are run concurrently, which means speedup with time consuming operations such as backprop, render etc..
+
+### Intro
 
 This is a concurrent wrapper for OpenAI Gym library that runs multiple environments concurrently, which means running faster in training\* without consuming more CPU power.
 
@@ -24,7 +33,7 @@ Despite its merits, OpenAI gym has one major drawback. It is designed to run _on
 
 Using `env.render` as our bottlenecking operation, runing 200 environments, our version`agymc` completes 50 episodes in 4 minutes, while naive `gym` version takes around twice as long. This is what the madness looks like:
 
-![Screenshot from 2020-01-20 21-02-55](/home/forerunner/Documents/agymc/assets/Screenshot from 2020-01-20 21-02-55.png)
+![Screenshot from 2020-01-20 21-02-55](./assets/Screenshot from 2020-01-20 21-02-55.png)
 
 ### Wow, how to use agymc ?
 

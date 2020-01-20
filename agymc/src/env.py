@@ -4,13 +4,13 @@ which handles wrapping all enviroments.
 
 FIXME
 The asynchronous version speeds up parallel execution by allowing calles that are time consuming to execute in the background.
-Since we introduce a lot of python overhead by wrapping calles to iterables with `Container` class,
+Since we introduce a lot of python overhead by wrapping calles to iterables with `ObjectHolder` class,
 if there are no such blocking calles,
 the performance can be as slow as 4 - 5 times slower than the unwrapped version.
 Even though the majority of the code is written with ctypes module,
 the performance still is not good.
-However, this version will not be bottlenecked by the speed GPU and CPU communicated,
-precisely because of the asynchronous nature
+However, this version will not be bottlenecked time consuming operations,
+precisely because of the asynchronous nature.
 
 ! Yes, this file can be written entirely with ctypes,
 ! however, that would make its python API much harder to use,
@@ -20,7 +20,6 @@ precisely because of the asynchronous nature
 import argparse
 import asyncio
 import ctypes
-import gc
 
 import gym
 
@@ -90,6 +89,24 @@ async def _Env_compute_reward(env, *args, **kwargs):
 
 async def _Env_class_name(env, *args, **kwargs):
     return env.class_name(*args, **kwargs)
+
+
+async def _Env_parallel(function, *args, **kwargs):
+    return function(*args, **kwargs)
+
+
+def _Env_parallel_arg_param(arguments, args):
+    for arg in zip(*arguments):
+        yield (*arg, *args)
+
+
+def _Env_parallel_kwarg_param(kwarguments, kwargs):
+    newdict = {k: iter(v) for (k, v) in kwarguments.items()}
+    while True:
+        try:
+            yield dict(**{k: next(v) for (k, v) in newdict.items()}, **kwargs)
+        except StopIteration:
+            break
 
 
 class Env:
@@ -209,6 +226,37 @@ class Env:
             )
         )
 
+    def parallel(self, function, arguments=list(), kwarguments=dict(), *args, **kwargs):
+        """
+        This method does not exist in the original gym library. For concurrent use.
+        `function` is a callable, and the `function` passed in will be executed concurrently.
+        arguments, kwarguments contains specific information for each environment.
+        This can be used to make batched prediction.
+
+        example:
+            >>> def predict(observation):
+                ...
+                return prediction
+            >>> results = env.parallel(predict, argument=[observation_list])
+            >>> env.step(results)
+            >>> env.parallel(backprop) # usually library do this in parallel automatically
+        """
+        return asyncio.get_event_loop().run_until_complete(
+            asyncio.gather(
+                *(
+                    _Env_parallel(function, *args, **kwargs)
+                    for (args, kwargs) in zip(
+                        _Env_parallel_arg_param(arguments, args),
+                        _Env_parallel_kwarg_param(kwarguments, kwargs),
+                    )
+                )
+            )
+        )
+
 
 def make(name_env, num_envs):
+    """
+    make `num_envs` `name_env`s
+    e.g. make("CartPole-v0", 100) makes 100 CartPole-v0 environments.
+    """
     return Env(tuple(gym.make(name_env) for _ in range(num_envs)))
