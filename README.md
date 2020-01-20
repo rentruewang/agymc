@@ -37,12 +37,21 @@ Using `env.render` as our bottlenecking operation, runing 200 environments, our 
 
 ### Wow, how to use agymc ?
 
-`agymc`, which combines the power of `Python` async API and OpenAI gym, hence the name, designed for users to make final Except now the returns are in _batches_ (lists). And except serveral environments are run asynchronously.
+`agymc`, which combines the power of `Python` async API and OpenAI gym, hence the name, designed for users to make final Except now the returns are in _batches_ (lists). And except serveral environments are run asynchronously. Example below!
+
+### Get Agymc Right Now !
+
+```shell
+pip install agymc
+```
+
+And that's it! Hooray!
 
 ### Example Usage Code Snippet
 
 ```python
 import argparse
+import time
 
 import agymc
 
@@ -59,22 +68,23 @@ if __name__ == "__main__":
     render = flags.render
     verbose = flags.verbose
 
-    envs = agync.make("CartPole-v0", num_envs)
+    envs = agymc.make("CartPole-v0", num_envs)
     if verbose:
         import tqdm
 
         iterable = tqdm.tqdm(range(num_episodes))
     else:
         iterable = range(num_episodes)
-
     for _ in iterable:
         done = list(False for _ in range(num_envs))
         envs.reset()
-
         while not all(done):
             if render:
                 envs.render()
             action = envs.action_space.sample()
+            # using time.sleep to simulate workflow
+            # because of asyncio, time.sleep will not block thread ;)
+            _ = envs.parallel(lambda *args: time.sleep, [num_envs * [1]])
             (_, _, done, _) = envs.step(action)
     envs.close()
 ```

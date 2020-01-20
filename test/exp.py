@@ -1,4 +1,5 @@
 import argparse
+import time
 
 import agymc
 
@@ -29,5 +30,8 @@ if __name__ == "__main__":
             if render:
                 envs.render()
             action = envs.action_space.sample()
+            # using time.sleep to simulate workflow
+            # because of asyncio, time.sleep will not block thread ;)
+            _ = envs.parallel(lambda *args: time.sleep, [num_envs * [1]])
             (_, _, done, _) = envs.step(action)
     envs.close()
