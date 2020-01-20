@@ -5,7 +5,7 @@ with open(file="./README.md", mode="r") as readme:
 
 setuptools.setup(
     name="agymc",
-    version="0.1.dev0",
+    version="0.1.1.1.dev0",
     author="MutatedFlood",
     author_email="b06901038@ntu.edu.tw",
     license="MIT",

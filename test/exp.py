@@ -15,7 +15,7 @@ if __name__ == "__main__":
     render = flags.render
     verbose = flags.verbose
 
-    envs = agync.make("CartPole-v0", num_envs)
+    envs = agymc.make("CartPole-v0", num_envs)
     if verbose:
         import tqdm
 
