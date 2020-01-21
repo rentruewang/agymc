@@ -31,7 +31,10 @@ if __name__ == "__main__":
                 envs.render()
             action = envs.action_space.sample()
             # using time.sleep to simulate workflow
-            # because of asyncio, time.sleep will not block thread ;)
+            # time.sleep blocks the current thread
+            # however we wrapped the environment in a rather nice way
+            # such that concurrency still applies
+            # the result: It won't block.
             _ = envs.parallel(lambda *args: time.sleep, [num_envs * [1]])
             (_, _, done, _) = envs.step(action)
     envs.close()

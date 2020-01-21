@@ -17,13 +17,13 @@ This is a concurrent wrapper for OpenAI Gym library that runs multiple environme
 
 Maybe you have heard of _parallel computing_ ? When we say we execute things in parallel, we run the program on _multiple_ processors, which offers significant speedup. _Concurrency computing_ has a broader meaning, though. The definition of a _concurrent_ program, is that it is designed not to execute sequentially, and will one day be executed parallelly\*\*. A _concurrent program_ can run on a sigle processor or multiple processors. These tasks may communicate with each other, but have separate private states hidden from others.
 
-### Why do we need _concurrency_ on a single processor ?
+### Can _concurrency_ be applied on a single processor ?
 
-Some tasks, by nature, takes a lot of time to complete. Downloading a file, for example. Without concurrency, the processor would have to wait for the task to complete before starting to execute the next task. However, with concurrency we could temporarily suspend the current task, and come back later when the task finishes. **Without using extra computing power.**
+Yes, _concurrency_ splits the program into smaller subprograms, allowing some parts of code to be executed asynchronously. Some tasks, by nature, takes a lot of time to complete. Downloading a file, for example. Without concurrency, the processor would have to wait for the task to complete before starting to execute the next task. However, with concurrency we could temporarily suspend the current task, and come back later when the task finishes. **Without using extra computing power.**
 
 ### So much for introducing concurrency... now, what is gym ?
 
-OpenAI gym, is a `Python` library that helps research reinforcement learning. Reinforcement learning is a branch from control theory, and focusing mainly on agents interacting with environments. And OpenAI gym provides numerous environments for people to benchmark their beloved reinforcement learning algorithms. For you agents to *train* in a _gym_, they say.
+OpenAI gym, is a `Python` library that helps research reinforcement learning. Reinforcement learning is a branch from control theory, and focusing mainly on agents interacting with environments. And OpenAI gym provides numerous environments for people to benchmark their beloved reinforcement learning algorithms. For you agents to _train_ in a _gym_, they say.
 
 ### Um, so why do we need agymc, do you say ?
 
@@ -83,7 +83,10 @@ if __name__ == "__main__":
                 envs.render()
             action = envs.action_space.sample()
             # using time.sleep to simulate workflow
-            # because of asyncio, time.sleep will not block thread ;)
+            # time.sleep blocks the current thread
+            # however we wrapped the environment in a rather nice way
+            # such that concurrency still applies
+            # the result: It won't block.
             _ = envs.parallel(lambda *args: time.sleep, [num_envs * [1]])
             (_, _, done, _) = envs.step(action)
     envs.close()
