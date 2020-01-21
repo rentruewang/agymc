@@ -1,5 +1,5 @@
 import argparse
-import time
+import asyncio
 
 import agymc
 
@@ -30,11 +30,13 @@ if __name__ == "__main__":
             if render:
                 envs.render()
             action = envs.action_space.sample()
-            # using time.sleep to simulate workflow
-            # time.sleep blocks the current thread
-            # however we wrapped the environment in a rather nice way
-            # such that concurrency still applies
+            # using asyncio.sleep to simulate workflow
+            # asyncio.sleep blocks the current thread
+            # however since concurrency is applied here
             # the result: It won't block.
-            _ = envs.parallel(lambda *args: time.sleep, [num_envs * [1]])
+            async def function(number):
+                await asyncio.sleep(number)
+
+            _ = envs.parallel(function, [num_envs * [1]])
             (_, _, done, _) = envs.step(action)
     envs.close()
