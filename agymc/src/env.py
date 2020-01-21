@@ -2,20 +2,24 @@
 This where the Env class is defined,
 which handles wrapping all enviroments.
 
-FIXME
-The asynchronous version speeds up parallel execution by allowing calles that are time consuming to execute in the background.
-Since we introduce a lot of python overhead by wrapping calles to iterables with `ObjectHolder` class,
+The concurrent version speeds up parallel execution
+by allowing calles that are time consuming to execute concurrently.
+Since we introduce a lot of python overhead
+by wrapping calles to iterables with `ObjectHolder` class,
 if there are no such blocking calles,
-the performance can be as slow as 4 - 5 times slower than the unwrapped version.
-Even though the majority of the code is written with ctypes module,
-the performance still is not good.
-However, this version will not be bottlenecked time consuming operations,
-precisely because of the asynchronous nature.
+the performance can be as slow as 4 - 5 times
+slower than the unwrapped version.
 
-! Yes, this file can be written entirely with ctypes,
-! however, that would make its python API much harder to use,
-! which defeats its purpose of being syntax sugar,
-! for wrapping multiple gym environments concurrently.
+Even though we tried our best to write in ctypes module,
+the performance still suffers from this overhead.
+However, this version will not be bottlenecked by 
+time consuming operations,
+precisely because of the concurrent nature.
+
+Yes, this file can be written entirely with ctypes module,
+and yes, that would yield much better performance.
+However, that would make its python API much harder to use,
+and different from OpenAI gym, which defeats its purpose.
 """
 import argparse
 import asyncio

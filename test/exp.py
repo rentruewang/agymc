@@ -32,10 +32,15 @@ if __name__ == "__main__":
             action = envs.action_space.sample()
             # using asyncio.sleep to simulate workflow
             # asyncio.sleep blocks the current thread
-            # however since concurrency is applied here
+            # however we wrapped the environment in a rather nice way
+            # such that concurrency still applies
             # the result: It won't block.
-            async def function(number):
-                await asyncio.sleep(number)
+            # also worth noting that using this "blocking call"
+            # runs faster than having this function do nothing
+            # I guess its because the the asyncio.sleep method
+            # forces the event loop to schedule thing more nicely
+            def function(number):
+                asyncio.create_task(asyncio.sleep(1))
 
             _ = envs.parallel(function, [num_envs * [1]])
             (_, _, done, _) = envs.step(action)
